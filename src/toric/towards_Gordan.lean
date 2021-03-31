@@ -75,13 +75,12 @@ begin
   replace hb := hb.1,
   rw [linear_independent_iff'] at ⊢ hb,
   intros t g hg i hi,
-  have hg' : t.sum (λ (i : fin n), g i • b i) = 0,
-  { convert hg,
-    ext i,
-    norm_cast,
-    congr,
-    simp only [int.cast_id, ring_hom.eq_int_cast] },
-  exact hb t g hg' i hi
+  refine hb t g _ i hi,
+  convert hg,
+  ext i,
+  rw [submodule.coe_smul_of_tower],
+  congr,
+  simp only [int.cast_id, ring_hom.eq_int_cast]
 end
 
 end reduction_from_ℚ_to_ℤ
