@@ -81,7 +81,7 @@ begin
       ext i,
       norm_cast,
       congr,
-      simp [int.cast_id, ring_hom.eq_int_cast] },
+      simp only [int.cast_id, ring_hom.eq_int_cast] },
     exact hb t g hg' i hi },
   { convert hb.2, }
 end
