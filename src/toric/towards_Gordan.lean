@@ -71,19 +71,17 @@ begin
   have goal := submodule.exists_is_basis_of_le_span hind Λ₁le,
   --goal seems to be the literal statement, but exact goal doesn't work
   obtain ⟨n, b, hb⟩ := goal,
-  use [n, b],
-  split,
-  { replace hb := hb.1,
-    rw [linear_independent_iff'] at ⊢ hb,
-    intros t g hg i hi,
-    have hg' : t.sum (λ (i : fin n), g i • b i) = 0,
-    { convert hg,
-      ext i,
-      norm_cast,
-      congr,
-      simp only [int.cast_id, ring_hom.eq_int_cast] },
-    exact hb t g hg' i hi },
-  { convert hb.2, }
+  refine ⟨n, b, ⟨_, by convert hb.2⟩⟩,
+  replace hb := hb.1,
+  rw [linear_independent_iff'] at ⊢ hb,
+  intros t g hg i hi,
+  have hg' : t.sum (λ (i : fin n), g i • b i) = 0,
+  { convert hg,
+    ext i,
+    norm_cast,
+    congr,
+    simp only [int.cast_id, ring_hom.eq_int_cast] },
+  exact hb t g hg' i hi
 end
 
 end reduction_from_ℚ_to_ℤ
