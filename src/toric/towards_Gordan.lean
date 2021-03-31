@@ -21,6 +21,7 @@ end
 -/
 
 import toric.toric
+import linear_algebra.free_module
 
 
 /-!
@@ -36,6 +37,7 @@ section reduction_from_ℚ_to_ℤ
 
 variables {V ι : Type*} [add_comm_group V] [semimodule ℚ V] [fintype ι] {v : ι → V}
   (bv : is_basis ℚ v)
+include bv
 
 /-- The vectors with integer coordinates in a `ℚ`-vector subspace `s ⊆ V` admit a finite basis.
 # Important: we transport finite generation of `V` to finite generation of `ℤ ^ N ∩ s`
@@ -52,7 +54,41 @@ needed in what follows.
 lemma reduction_to_lattice (s : submodule ℚ V) :
   ∃ (n : ℕ) (vn : fin n → s.restrict_scalars ℤ ⊓ submodule.span ℤ (set.range v)),
   is_basis ℤ vn :=
-sorry
+begin
+  let Λ := submodule.span ℤ (set.range v),
+  let Λ₁ := s.restrict_scalars ℤ ⊓ submodule.span ℤ (set.range v),
+  have Λ₁le  : Λ₁ ≤ Λ := inf_le_right,
+  have hind : linear_independent ℤ v,
+  { replace bv := bv.1,
+    rw [linear_independent_iff'] at ⊢ bv,
+    intros s g hg i hi,
+    have H : ∀ (i : ι), (↑(g i) : ℚ) • v i = (g i) • v i,
+    { intro i,
+      rw [← gsmul_eq_smul, gsmul_eq_smul_cast _ _] },
+    have hg' : s.sum (λ (i : ι), (λ (i : ι), (↑(g i) : ℚ)) i • v i) = 0,
+    { simp only [H, hg]},
+    simpa using bv s (λ i, g i) hg' i hi },
+  have goal := submodule.exists_is_basis_of_le_span hind Λ₁le,
+  --goal seems to be the literal statement, but exact goal doesn't work
+  obtain ⟨n, b, hb⟩ := goal,
+  use [n, b],
+  split,
+  { replace hb := hb.1,
+    rw [linear_independent_iff'] at ⊢ hb,
+    intros t g hg i hi,
+    have hg' : t.sum (λ (i : fin n), g i • b i) = 0,
+    { convert hg,
+      ext i,
+      simp only [submodule.coe_smul_of_tower],
+      refine int.induction_on (g i) _ _ _,
+      { simp only [zero_smul, submodule.coe_zero]},
+      { intros j hj,
+        rw [add_smul, one_smul, add_smul, one_smul, hj, submodule.coe_add] },
+      { intros j hj,
+        rw [sub_smul, one_smul, sub_smul, one_smul, hj, submodule.coe_sub] } },
+    exact hb t g hg' i hi },
+  { convert hb.2, }
+end
 
 end reduction_from_ℚ_to_ℤ
 
