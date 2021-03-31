@@ -55,9 +55,6 @@ lemma reduction_to_lattice (s : submodule ℚ V) :
   ∃ (n : ℕ) (vn : fin n → s.restrict_scalars ℤ ⊓ submodule.span ℤ (set.range v)),
   is_basis ℤ vn :=
 begin
-  let Λ := submodule.span ℤ (set.range v),
-  let Λ₁ := s.restrict_scalars ℤ ⊓ submodule.span ℤ (set.range v),
-  have Λ₁le  : Λ₁ ≤ Λ := inf_le_right,
   have hind : linear_independent ℤ v,
   { replace bv := bv.1,
     rw [linear_independent_iff'] at ⊢ bv,
@@ -68,9 +65,8 @@ begin
     have hg' : s.sum (λ (i : ι), (λ (i : ι), (↑(g i) : ℚ)) i • v i) = 0,
     { simp only [H, hg]},
     simpa using bv s (λ i, g i) hg' i hi },
-  have goal := submodule.exists_is_basis_of_le_span hind Λ₁le,
-  --goal seems to be the literal statement, but exact goal doesn't work
-  obtain ⟨n, b, hb⟩ := goal,
+  --The RHS seems to be the statement we want, but some work is needed
+  obtain ⟨n, b, hb⟩ := submodule.exists_is_basis_of_le_span hind inf_le_right,
   refine ⟨n, b, ⟨_, by convert hb.2⟩⟩,
   replace hb := hb.1,
   rw [linear_independent_iff'] at ⊢ hb,
