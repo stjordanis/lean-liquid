@@ -79,13 +79,9 @@ begin
     have hg' : t.sum (λ (i : fin n), g i • b i) = 0,
     { convert hg,
       ext i,
-      simp only [submodule.coe_smul_of_tower],
-      refine int.induction_on (g i) _ _ _,
-      { simp only [zero_smul, submodule.coe_zero]},
-      { intros j hj,
-        rw [add_smul, one_smul, add_smul, one_smul, hj, submodule.coe_add] },
-      { intros j hj,
-        rw [sub_smul, one_smul, sub_smul, one_smul, hj, submodule.coe_sub] } },
+      norm_cast,
+      congr,
+      simp [int.cast_id, ring_hom.eq_int_cast] },
     exact hb t g hg' i hi },
   { convert hb.2, }
 end
