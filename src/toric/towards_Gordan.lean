@@ -151,8 +151,73 @@ def pre_generators (s : set M) : set N := { c : N | c ∈ dual_set nat_submodule
 ## Reason
 Each `pre_generator` is uniquely determined by a subset of `s` (but not conversely!).
 Thus, finiteness of `pre_generators` should be a direct consequence of finiteness of `s`. -/
-lemma pre_generators_finite (s : set M) [fintype s] : fintype (pre_generators f s) :=
-sorry
+
+noncomputable
+lemma pre_generators_finite (bv : is_basis ℤ v) (s : set M) [fintype s] :
+  fintype (pre_generators f s) :=
+begin
+  let j : (pre_generators f s) → (set M) := λ p, classical.some p.2.2,
+  have Hincl : ∀ g, j g ⊆ s,
+  { intro g,
+    obtain ⟨A, B⟩ := classical.some_spec g.2.2,
+    exact A },
+  have Hspec : ∀ g, dual_set nat_submodule f (({1, -1} : set ℤ) • (j g)) = submodule.span ℕ {g},
+  { intro g,
+    obtain ⟨A, B⟩ := classical.some_spec g.2.2,
+    exact B },
+  let i : (pre_generators f s) → (set s) := λ g, set.range (set.inclusion (Hincl g)),
+  suffices : function.injective i,
+  { exact fintype.of_injective i this },
+  intros g₁ g₂ h,
+  suffices hjinj : function.injective j,
+  { suffices : j g₁ = j g₂,
+    { exact hjinj this },
+    ext,
+    split,
+    { intro hx,
+      let y : ↥s := ⟨x, Hincl g₁ hx⟩,
+      have hy : y ∈ i g₁,
+      { simp only [set.mem_range, set_coe.exists],
+        use [x, hx],
+        refl },
+      rw [h, set.mem_range, set_coe.exists] at hy,
+      obtain ⟨z, hz, hzx⟩ := hy,
+      rwa [subtype.mk.inj (eq.symm hzx)] },
+    { intro hx,
+      let y : ↥s := ⟨x, Hincl g₂ hx⟩,
+      have hy : y ∈ i g₂,
+      { simp only [set.mem_range, set_coe.exists],
+        use [x, hx],
+        refl },
+      rw [← h, set.mem_range, set_coe.exists] at hy,
+      obtain ⟨z, hz, hzx⟩ := hy,
+      rwa [subtype.mk.inj (eq.symm hzx)] } },
+    intros g₁ g₂ h,
+  suffices : @submodule.span ℕ N _ _ _ {g₁} = @submodule.span ℕ N _ _ _ {g₂},
+  { have hg₁ := @submodule.subset_span ℕ N _ _ _ {g₁},
+    replace hg₁ := hg₁ (set.mem_singleton ↑g₁),
+    have hg₂ := @submodule.subset_span ℕ N _ _ _ {g₂},
+    replace hg₂ := hg₂ (set.mem_singleton ↑g₂),
+    obtain ⟨a, ha⟩ := submodule.le_span_singleton_iff.1 this.le g₁ hg₁,
+    obtain ⟨b, hb⟩ := submodule.le_span_singleton_iff.1 this.symm.le g₂ hg₂,
+    rw [← ha] at hb,
+    have hint : b • a • ↑g₂ = (b : ℤ) • (a : ℤ) • ↑g₂,
+    { rw [← gsmul_eq_smul (a : ℤ) (↑g₂ : N), ← gsmul_eq_smul (b : ℤ) (_ : N),
+        ← nsmul_eq_smul a (↑g₂ : N), ← nsmul_eq_smul b (_ : N)],
+      simp only [gsmul_coe_nat] },
+    rw [hint] at hb,
+    nth_rewrite 1 [← one_smul ℤ (↑g₂ : N)] at hb,
+    replace hb := sub_eq_zero.2 hb,
+    rw [← smul_assoc, ← sub_smul _ _ _] at hb,
+    cases (is_basis.smul_eq_zero bv).1 hb with H Hzero,
+    { rw [algebra.id.smul_eq_mul, sub_eq_zero] at H,
+      norm_cast at H,
+      rw [nat.dvd_one.1 (dvd.intro_left b H), one_smul] at ha,
+      exact subtype.eq ha.symm },
+    { rw [Hzero, smul_zero, ← Hzero] at ha,
+      exact subtype.eq ha.symm } },
+  rw [← Hspec g₁, ← Hspec g₂, h]
+end
 
 /-- Rational linear combinations of basis elements, with coefficients in `[0, 1]` and that are
 contained in the `ℤ`-lattice spanned by the basis elements. -/
