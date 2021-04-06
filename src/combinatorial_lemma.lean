@@ -3,7 +3,7 @@ import normed_group.NormedGroup
 import Mbar.basic
 import normed_group.pseudo_normed_group
 import partition
-import lem97
+import toric.lem97
 
 import hacks_and_tricks.by_exactI_hack
 
@@ -148,16 +148,23 @@ begin
   rw Mbar.mem_filtration_iff at hx ⊢,
   refine le_trans (finset.sum_le_sum _) hx,
   rintro s -,
-  refine tsum_le_tsum _ (((N • x₀) (l i)).summable s) ((x (l i)).summable s),
+  refine tsum_le_tsum _ (Mbar.summable _ s) ((x (l i)).summable s),
   intro n,
   refine mul_le_mul' _ le_rfl,
   norm_cast,
-  simp only [add_monoid_hom.nat_smul_apply],
-  simp only [← nsmul_eq_smul, Mbar.coe_nsmul, nsmul_eq_mul,
-    pi.mul_apply, pi.nat_apply, @pi.nat_apply ℕ ℤ _ _ _ N,
-    int.nat_cast_eq_coe_nat, int.nat_abs_mul, int.nat_abs_of_nat],
   convert le_trans (le_add_right le_rfl) (H s n i).ge,
-  apply hx'
+  swap, { apply hx' },
+  rw [← int.nat_abs_of_nat N, ← int.nat_abs_mul, int.nat_abs_of_nat,
+    ← int.nat_cast_eq_coe_nat, ← nsmul_eq_mul, nsmul_eq_smul],
+  congr' 1,
+  show _ = N • (x₀ (l i) s n),
+  have := add_monoid_hom.nat_smul_apply N x₀ (l i),
+  rw Mbar.ext_iff at this,
+  replace := congr_fun this s,
+  replace := congr_fun this n,
+  convert this,
+  simp only [← nsmul_eq_smul, Mbar.coe_nsmul, nsmul_eq_mul,
+    pi.mul_apply, pi.nat_apply, @pi.nat_apply ℕ ℤ _ _ _ N],
 end
 
 @[simps]
@@ -390,7 +397,7 @@ begin
   have oops : @polyhedral_lattice.int_semimodule Λ _ = @add_comm_group.int_module Λ _,
   { exact subsingleton.elim _ _ },
   rw oops at ffΛ,
-  obtain ⟨A, hA⟩ := lem97' ffΛ N l,
+  obtain ⟨A, hA⟩ := lem97' ffΛ N hN l,
   let d : ℝ≥0 := finset.univ.sup (λ i, ∑ a in A, nnnorm (a (l i)) / nnnorm (l i)),
   use d,
   introsI S hS c x hx,
