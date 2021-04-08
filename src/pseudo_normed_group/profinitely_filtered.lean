@@ -495,7 +495,23 @@ end
 
 instance pi : profinitely_filtered_pseudo_normed_group (Π i, M i) :=
 { continuous_add' := sorry,
-  continuous_neg' := sorry,
+  continuous_neg' :=
+    begin
+      intro c,
+    -- have aux : filtration (M₁ × M₂ ) c ≃ₜ (filtration M₁ c) × (filtration M₂ c), sorry,
+      rw ← homeomorph.comp_continuous_iff (filtration_pi_homeo M c),
+      rw ← homeomorph.comp_continuous_iff' (filtration_pi_homeo M c).symm,
+      apply continuous_pi,
+      intro i,
+      have h_prod : ∀ a, (((filtration_pi_homeo M c) ∘ neg') ∘ ((filtration_pi_homeo M c).symm)) a i =
+        (neg' : filtration (M i) c → filtration (M i) c ) (a i), sorry,
+      --   prod.map (neg' : (filtration M₁ c) → (filtration M₁ c))(neg' : (filtration M₂ c) → (filtration M₂ c)),
+      -- sorry,
+      simp_rw h_prod,
+      sorry,
+
+      -- apply continuous_neg' c,--] at *,
+    end,
   continuous_cast_le := sorry,
   .. pseudo_normed_group.pi M }
 
@@ -544,7 +560,24 @@ instance prod_compact (c : ℝ≥0) : compact_space (filtration (M₁ × M₂) c
 instance prod :
   profinitely_filtered_pseudo_normed_group (M₁ × M₂) :=
 { continuous_add' := sorry,
-  continuous_neg' := sorry,
+  continuous_neg' :=
+    begin
+    intro c,
+    -- apply continuous_apply,
+    have aux : filtration (M₁ × M₂ ) c ≃ₜ (filtration M₁ c) × (filtration M₂ c), sorry,
+    rw ← homeomorph.comp_continuous_iff aux,
+    rw ← homeomorph.comp_continuous_iff' aux.symm,
+    have h_prod : (aux ∘ neg') ∘ (aux.symm) = prod.map (neg' : (filtration M₁ c) → (filtration M₁ c))(neg' : (filtration M₂ c) → (filtration M₂ c)),
+    sorry,
+    rw h_prod,
+    sorry,
+    -- apply continuous_pi_iff.mpr,
+    -- have : (aux.symm) ∘ aux ∘ neg' = (neg' : (filtration M₁ c) → (filtration M₁ c)),
+
+    -- sorry,
+    -- have aux' := ((continuous_apply j).prod_map (continuous_apply j)).comp aux,
+    -- rw prod_equiv
+  end,
   continuous_cast_le := sorry,
   .. pseudo_normed_group.prod M₁ M₂ }
 
